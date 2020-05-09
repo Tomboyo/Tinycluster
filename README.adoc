@@ -24,7 +24,13 @@ list of nodes from EPMD, pings each to confrim it can be reached, and then
 yields the name of all pingable nodes. We then connect to each in turn, thereby
 clustering with all local nodes without knowing their names. As a user, if I
 start several `iex` sessions on my laptop with the Tinycluster application
-running, they will automatically discover and connect to one another.
+running on any of them, they will automatically discover and connect to one
+another.
+
+Since node connections are symmetric and transitive, only one node on a host
+needs to run tinycluster for the nodes to become completely connected. Since
+tinycluster polls, it will discover non-tinycluster nodes as they start. Running
+tinycluster on more than one node is fine too, however.
 
 [bibliography]
 == References
