@@ -16,25 +16,19 @@ defmodule Tinycluster do
       |> List.last()
       |> String.to_atom()
 
-    schedule_connect(0)
-
-    {:ok, %{host: host, verbose: verbose, interval: interval}}
+    {:ok, %{host: host, verbose: verbose, interval: interval}, 0}
   end
 
-  defp schedule_connect(interval) do
-    Process.send_after(self(), :connect, interval)
-  end
-
+  # On timeout, attempt to cluster, then schedule another timeout.
   @impl true
-  def handle_info(:connect, state) do
+  def handle_info(:timeout, state) do
     %{host: host, verbose: verbose, interval: interval} = state
     connect(host, verbose)
-    schedule_connect(interval)
-    {:noreply, state}
+    {:noreply, state, interval}
   end
 
   # Connect to all nodes registered with epmd on the host of this process
-  def connect(host, verbose \\ :silent) do
+  defp connect(host, verbose) do
     :net_adm.world_list([host], verbose)
     |> Enum.each(&Node.connect/1)
   end
