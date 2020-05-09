@@ -1,0 +1,32 @@
+= Tinycluster
+
+For Fun And Practice, create an elixir application which can discover and
+connect to arbitrary elixir nodes running on the same host by polling EPMD. In
+particular, do not require the user to specify the names of other nodes ahead of
+time.
+
+An erlang node is started with a given name (via --sname or --name) and is
+assigned a port by the operating system. This port is registered with the Erlang
+Port Mapper Daemon (EPMD) <<epmd>>, which records a mapping from the node's name
+to its port, enabling nodes to connect and communicate with one another. For
+example, to connect to `name@host`, a node must first contact the EPMD running
+on `host`, which will return the port number associated with `name`. The node
+can then contact `name@host` directly using its complete address. (Note that
+`host` is resolved to an ip address in the usual way; EPMD has no role in that
+process.)
+
+In this way EPMD maintains a list of all nodes running on its host. We can query
+EPMD for this list in order to discover the names and addresses of other nodes
+on our host, and thereby automatically cluster all nodes on the same host.
+
+Tinycluster calls `:net_adm.world_list/2` <<world_list>>, which retrieves the
+list of nodes from EPMD, pings each to confrim it can be reached, and then
+yields the name of all pingable nodes. We then connect to each in turn, thereby
+clustering with all local nodes without knowing their names. As a user, if I
+start several `iex` sessions on my laptop with the Tinycluster application
+running, they will automatically discover and connect to one another.
+
+[bibliography]
+== References
+- [[[epmd, 1]]] http://erlang.org/doc/man/epmd.html
+- [[[world_list, 2]]] http://erlang.org/doc/man/net_adm.html#world_list-1
